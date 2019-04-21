@@ -1,13 +1,19 @@
 package mate.servlets.model;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class UserTest {
 
-    private User user = new User("bohdan", "123");
+    private User user;
+
+    @Before
+    public void init() {
+        user = new User("bohdan", "123");
+    }
 
     @Test
     public void getLogin() {

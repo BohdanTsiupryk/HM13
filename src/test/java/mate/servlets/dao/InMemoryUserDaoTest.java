@@ -14,15 +14,20 @@ import java.util.List;
 
 public class InMemoryUserDaoTest {
     private static UserDao userDao;
-    private User ivan = new User("Ivan", "abcde");
-    private User stepan = new User("Stepan", "qwerty");
-    private User bohdan = new User("Bohdan", "123456");
+
+    private User ivan;
+    private User stepan;
+    private User bohdan;
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void before() throws ThisLoginIsExistException {
+        ivan = new User("Ivan", "abcde");
+        stepan = new User("Stepan", "qwerty");
+        bohdan = new User("Bohdan", "123456");
+
         userDao = new InMemoryUserDao();
         userDao.addUser(bohdan);
         userDao.addUser(ivan);
