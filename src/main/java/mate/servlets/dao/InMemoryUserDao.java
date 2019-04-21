@@ -1,5 +1,6 @@
 package mate.servlets.dao;
 
+import mate.servlets.exception.ThisLoginIsExistException;
 import mate.servlets.model.User;
 
 import java.util.ArrayList;
@@ -7,10 +8,14 @@ import java.util.List;
 
 public class InMemoryUserDao implements UserDao {
 
-    private static final List<User> USERS = new ArrayList<User>();
+    private final List<User> USERS = new ArrayList<User>();
 
-    public void addUser(User user) {
-        USERS.add(user);
+    public void addUser(User user) throws ThisLoginIsExistException {
+        if (!contains(user.getLogin())) {
+            USERS.add(user);
+        } else {
+            throw new ThisLoginIsExistException();
+        }
     }
 
     public List<User> getUsers() {
@@ -28,6 +33,4 @@ public class InMemoryUserDao implements UserDao {
                 .findFirst()
                 .orElse(new User(null,"")).getPassword().equals(pass);
     }
-
-
 }

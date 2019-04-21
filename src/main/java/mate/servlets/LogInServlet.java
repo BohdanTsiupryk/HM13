@@ -16,6 +16,10 @@ public class LogInServlet extends HttpServlet {
     private static final UserDao userService = new InMemoryUserDao();
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html");
+
         String login = request.getParameter("login");
         String password = request.getParameter("password");
         PrintWriter writer = response.getWriter();
