@@ -1,5 +1,6 @@
 package mate.servlets;
 
+import mate.servlets.dao.DatabaseUserDao;
 import mate.servlets.dao.InMemoryUserDao;
 import mate.servlets.dao.UserDao;
 import mate.servlets.exception.ThisLoginIsExistException;
@@ -15,7 +16,7 @@ import java.io.PrintWriter;
 
 @WebServlet(value = "/registration")
 public class RegistrationServlet extends HttpServlet {
-    private static final UserDao userService = new InMemoryUserDao();
+    private static final UserDao userService = new DatabaseUserDao();
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setCharacterEncoding("UTF-8");
