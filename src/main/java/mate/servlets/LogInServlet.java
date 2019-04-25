@@ -1,9 +1,9 @@
 package mate.servlets;
 
 import mate.servlets.dao.DatabaseUserDao;
-import mate.servlets.dao.InMemoryUserDao;
 import mate.servlets.dao.UserDao;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -23,12 +23,17 @@ public class LogInServlet extends HttpServlet {
 
         String login = request.getParameter("login");
         String password = request.getParameter("password");
-        PrintWriter writer = response.getWriter();
 
         if (userService.contains(login, password)) {
-            writer.println("Hello " + login);
+            request.setAttribute("helloLogin", login);
+            request.setAttribute("users", userService.getUsers());
+
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher("hello.jsp");
+            requestDispatcher.forward(request, response);
         } else {
-            writer.println("Bad login or password");
+            request.setAttribute("badPass", true);
+            RequestDispatcher requestDispatcher = request.getRequestDispatcher("login.jsp");
+            requestDispatcher.forward(request, response);
         }
     }
 }
