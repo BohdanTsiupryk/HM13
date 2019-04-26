@@ -14,7 +14,7 @@
 <body aling="center">
 EDIT INFORMATION ABOUT USER(${user.getLogin()}) <br><br>
 <form action="/edit" method="post" accept-charset="UTF-8">
-    <input type="hidden" value="${user.getID()}" name="id"/>
+    <input type="hidden" value="${user.getId()}" name="id"/>
     Login <br> <input type="text" value="${user.getLogin()}" placeholder="Login" required size="20" name="login"/> <br><br>
     Email <br> <input type="text" value="${user.getEmail()}" placeholder="Email" required size="20" name="email"/> <br><br>
     Country <br> <input type="text" value="${user.getCountry()}" placeholder="Country" required size="20" name="country"/> <br><br>

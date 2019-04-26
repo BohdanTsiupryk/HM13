@@ -1,14 +1,14 @@
 package mate.servlets.model;
 
 public class User {
-    private int ID;
+    private int id;
     private String login;
     private String password;
     private String email;
     private String country;
 
-    public User(int ID, String login, String password, String email, String country) {
-        this.ID = ID;
+    public User(int id, String login, String password, String email, String country) {
+        this.id = id;
         this.login = login;
         this.password = password;
         this.email = email;
@@ -26,12 +26,12 @@ public class User {
         this.password = password;
     }
 
-    public int getID() {
-        return ID;
+    public int getId() {
+        return id;
     }
 
-    public void setID(int ID) {
-        this.ID = ID;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getLogin() {

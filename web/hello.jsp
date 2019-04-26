@@ -4,11 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Hello ${helloLogin}</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+    </style>
 </head>
 <body>
     <table>
         <tr>
-            <th>ID</th>
+            <th>id</th>
             <th>Login</th>
             <th>Password</th>
             <th>E-mail</th>
@@ -18,11 +27,11 @@
         </tr>
         <c:forEach var="user" items="${users}">
             <tr>
-            <td><c:out value="${user.getID()}"/></td>
-            <td><c:out value="${user.getLogin()}"/></td>
-            <td><c:out value="${user.getPassword()}"/></td>
-            <td><c:out value="${user.getEmail()}"/></td>
-            <td><c:out value="${user.getCountry()}"/></td>
+            <td>${user.getId()}</td>
+            <td>${user.getLogin()}</td>
+            <td>${user.getPassword()}</td>
+            <td>${user.getEmail()}</td>
+            <td>${user.getCountry()}</td>
             <td>
                 <form action="/edit" accept-charset="UTF-8">
                     <button value="${user.getLogin()}" name="edit">edit</button>
@@ -30,7 +39,7 @@
             </td>
             <td>
                 <form action="/delete" accept-charset="UTF-8">
-                    <button value="${user.getID()}" name="delete">delete</button>
+                    <button value="${user.getId()}" name="delete">delete</button>
                 </form>
             </td>
             </tr>

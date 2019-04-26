@@ -3,7 +3,11 @@ package mate.servlets.dao;
 import mate.servlets.exception.ThisLoginIsExistException;
 import mate.servlets.model.User;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,20 +17,25 @@ public class DatabaseUserDao implements UserDao {
 
     @Override
     public void addUser(User user) throws ThisLoginIsExistException {
-        String sqlQuery = "INSERT INTO users(login,pass,email,country) VALUES ('"
-                + user.getLogin() + "','" + user.getPassword() + "','"
-                + user.getEmail() + "','" + user.getCountry() + "');";
-        String sqlQueryGet = "SELECT * FROM users WHERE login = '" + user.getLogin() + "';";
+        String sqlQueryAdd = "INSERT INTO users(login,pass,email,country) VALUES (?,?,?,?)";
+        String sqlQueryGet = "SELECT * FROM users WHERE login = ?";
 
         try (Connection connection = DbConnector.getConnection();
-             Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery(sqlQueryGet);
+             PreparedStatement statementAdd = connection.prepareStatement(sqlQueryAdd);
+             PreparedStatement statementGet = connection.prepareStatement(sqlQueryGet)) {
+            statementGet.setString(1, user.getLogin());
 
-            if (resultSet.next()) {
+            statementAdd.setString(1, user.getLogin());
+            statementAdd.setString(2, user.getPassword());
+            statementAdd.setString(3, user.getEmail());
+            statementAdd.setString(4, user.getCountry());
+
+            if (!statementGet.executeQuery().next()) {
+                statementAdd.execute();
+            } else {
                 throw new ThisLoginIsExistException();
             }
 
-            statement.execute(sqlQuery);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -80,7 +89,7 @@ public class DatabaseUserDao implements UserDao {
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getEmail());
             statement.setString(4, user.getCountry());
-            statement.setInt(5, user.getID());
+            statement.setInt(5, user.getId());
 
             statement.executeUpdate();
         } catch (SQLException e) {
