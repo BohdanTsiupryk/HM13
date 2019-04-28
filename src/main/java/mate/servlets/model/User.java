@@ -1,5 +1,7 @@
 package mate.servlets.model;
 
+import java.util.Objects;
+
 public class User {
     private int id;
     private String login;
@@ -64,5 +66,20 @@ public class User {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+        return id == user.id &&
+                login.equals(user.login);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, login);
     }
 }

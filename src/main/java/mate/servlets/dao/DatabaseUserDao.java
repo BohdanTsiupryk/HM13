@@ -117,7 +117,7 @@ public class DatabaseUserDao implements UserDao {
             ResultSet resultSet = statement.executeQuery(sqlGetAll);
 
             while (resultSet.next()) {
-                if (resultSet.getString(1).equals(login)) {
+                if (resultSet.getString("login").equals(login)) {
                     return true;
                 }
             }
