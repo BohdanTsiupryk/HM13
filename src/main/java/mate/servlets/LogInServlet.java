@@ -1,7 +1,7 @@
 package mate.servlets;
 
-import mate.servlets.dao.DatabaseUserDao;
-import mate.servlets.dao.UserDao;
+import mate.dao.DatabaseUserDao;
+import mate.dao.UserDao;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 @WebServlet(value = "/login")
 public class LogInServlet extends HttpServlet {

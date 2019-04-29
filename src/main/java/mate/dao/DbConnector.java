@@ -1,4 +1,4 @@
-package mate.servlets.dao;
+package mate.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

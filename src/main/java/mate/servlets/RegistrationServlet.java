@@ -1,9 +1,9 @@
 package mate.servlets;
 
-import mate.servlets.dao.DatabaseUserDao;
-import mate.servlets.dao.UserDao;
-import mate.servlets.exception.ThisLoginIsExistException;
-import mate.servlets.model.User;
+import mate.dao.DatabaseUserDao;
+import mate.dao.UserDao;
+import mate.exception.ThisLoginIsExistException;
+import mate.model.User;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;

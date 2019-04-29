@@ -1,4 +1,4 @@
-package mate.servlets.exception;
+package mate.exception;
 
 public class ThisLoginIsExistException extends Throwable {
 }

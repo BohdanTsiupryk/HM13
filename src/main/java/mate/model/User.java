@@ -1,4 +1,4 @@
-package mate.servlets.model;
+package mate.model;
 
 public class User {
     private int id;
