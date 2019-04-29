@@ -2,10 +2,13 @@ package mate.servlets.dao;
 
 import mate.servlets.exception.ThisLoginIsExistException;
 import mate.servlets.model.User;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.sql.SQLException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
