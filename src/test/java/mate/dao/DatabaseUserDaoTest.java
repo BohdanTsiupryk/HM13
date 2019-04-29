@@ -1,7 +1,7 @@
-package mate.servlets.dao;
+package mate.dao;
 
-import mate.servlets.exception.ThisLoginIsExistException;
-import mate.servlets.model.User;
+import mate.exception.ThisLoginIsExistException;
+import mate.model.User;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

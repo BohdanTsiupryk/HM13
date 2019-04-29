@@ -1,6 +1,5 @@
-package mate.servlets.model;
+package mate.model;
 
-import mate.model.User;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

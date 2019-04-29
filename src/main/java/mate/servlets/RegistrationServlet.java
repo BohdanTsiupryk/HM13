@@ -28,7 +28,6 @@ public class RegistrationServlet extends HttpServlet {
         String repassword = request.getParameter("repassword");
         String email = request.getParameter("email");
         String country = request.getParameter("country");
-        PrintWriter writer = response.getWriter();
 
         if (!password.equals(repassword)) {
             RequestDispatcher rd = request.getRequestDispatcher("registration.jsp");
