@@ -3,6 +3,7 @@ package mate.servlets;
 import mate.dao.DatabaseUserDao;
 import mate.dao.UserDao;
 import mate.model.User;
+import org.apache.log4j.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -15,16 +16,23 @@ import java.util.List;
 
 @WebServlet(value = "/delete")
 public class DeleteServlet extends HttpServlet {
+    private static final Logger log = Logger.getLogger(DeleteServlet.class);
     private static final UserDao userService = new DatabaseUserDao();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String delete = request.getParameter("delete");
+        Integer deleteId = Integer.valueOf(delete);
 
-        userService.deleteUser(Integer.valueOf(delete));
+        log.debug("Try delete user with id: " + deleteId);
+        if (userService.deleteUser(deleteId)) {
+            log.debug("Successful deleted id: " + deleteId);
+        }
+
         List<User> users = userService.getUsers();
+        log.debug("Get users, count: " + users.size());
+
         request.setAttribute("users", users);
 
-        RequestDispatcher requestDispatcher = request.getRequestDispatcher("hello.jsp");
-        requestDispatcher.forward(request, response);
+        request.getRequestDispatcher("hello.jsp").forward(request, response);
     }
 }

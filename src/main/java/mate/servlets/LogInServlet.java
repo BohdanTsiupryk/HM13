@@ -2,6 +2,7 @@ package mate.servlets;
 
 import mate.dao.DatabaseUserDao;
 import mate.dao.UserDao;
+import org.apache.log4j.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -13,6 +14,7 @@ import java.io.IOException;
 
 @WebServlet(value = "/login")
 public class LogInServlet extends HttpServlet {
+    private static final Logger log = Logger.getLogger(LogInServlet.class);
     private static final UserDao userService = new DatabaseUserDao();
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -26,12 +28,13 @@ public class LogInServlet extends HttpServlet {
             request.setAttribute("helloLogin", login);
             request.setAttribute("users", userService.getUsers());
 
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher("hello.jsp");
-            requestDispatcher.forward(request, response);
+            log.info("Success login by: " + login);
+
+            request.getRequestDispatcher("hello.jsp").forward(request, response);
         } else {
+            log.info("User with login: " + login + ", bad try to authorization!");
             request.setAttribute("badPass", true);
-            RequestDispatcher requestDispatcher = request.getRequestDispatcher("login.jsp");
-            requestDispatcher.forward(request, response);
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
 }
