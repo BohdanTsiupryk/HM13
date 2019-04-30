@@ -22,6 +22,7 @@
             <th>Password</th>
             <th>E-mail</th>
             <th>Country</th>
+            <th>Role</th>
             <th>Edit</th>
             <th>Delete</th>
         </tr>
@@ -32,6 +33,7 @@
             <td>${user.getPassword()}</td>
             <td>${user.getEmail()}</td>
             <td>${user.getCountry()}</td>
+            <td>${user.getRole()}</td>
             <td>
                 <form action="/edit" accept-charset="UTF-8">
                     <button value="${user.getLogin()}" name="edit">edit</button>

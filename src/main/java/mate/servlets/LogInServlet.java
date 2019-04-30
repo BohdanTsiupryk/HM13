@@ -2,9 +2,10 @@ package mate.servlets;
 
 import mate.dao.DatabaseUserDao;
 import mate.dao.UserDao;
+import mate.enums.Role;
+import mate.model.User;
 import org.apache.log4j.Logger;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -26,11 +27,19 @@ public class LogInServlet extends HttpServlet {
 
         if (userService.contains(login, password)) {
             request.setAttribute("helloLogin", login);
-            request.setAttribute("users", userService.getUsers());
+            User user = userService.getUser(login).get();
+            request.getSession().setAttribute("user", user);
 
-            log.info("Success login by: " + login);
+            if (user.getRole().equals(Role.ADMIN)) {
+                log.info("Admin " + login + " online");
+                request.getRequestDispatcher("/admin").forward(request, response);
+            } else if (user.getRole().equals(Role.USER)) {
+                log.info("User " + login + " online");
+                request.setAttribute("user", user);
+                request.getRequestDispatcher("userProfile.jsp").forward(request, response);
+            }
 
-            request.getRequestDispatcher("hello.jsp").forward(request, response);
+            request.getRequestDispatcher("info/accessDenied.jsp").forward(request, response);
         } else {
             log.info("User with login: " + login + ", bad try to authorization!");
             request.setAttribute("badPass", true);

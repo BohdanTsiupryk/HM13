@@ -33,6 +33,6 @@ public class DeleteServlet extends HttpServlet {
 
         request.setAttribute("users", users);
 
-        request.getRequestDispatcher("hello.jsp").forward(request, response);
+        request.getRequestDispatcher("adminPage.jsp").forward(request, response);
     }
 }

@@ -1,5 +1,6 @@
 package mate.dao;
 
+import mate.enums.Role;
 import mate.exception.ThisLoginIsExistException;
 import mate.model.User;
 import org.apache.log4j.Logger;
@@ -15,11 +16,11 @@ import java.util.Optional;
 
 public class DatabaseUserDao implements UserDao {
     private static final Logger log = Logger.getLogger(DatabaseUserDao.class);
-    private String sqlGetAll = "SELECT * FROM users;";
+    private String sqlGetAll = "SELECT users.id,login,pass, email, country, name FROM users LEFT JOIN roles ON users.role = roles.id;";
 
     @Override
     public boolean addUser(User user) throws ThisLoginIsExistException {
-        String sqlQueryAdd = "INSERT INTO users(login,pass,email,country) VALUES (?,?,?,?)";
+        String sqlQueryAdd = "INSERT INTO users(login,pass,email,country,role) VALUES (?,?,?,?,?)";
         String sqlQueryGet = "SELECT * FROM users WHERE login = ?";
 
         try (Connection connection = DbConnector.getConnection();
@@ -31,9 +32,10 @@ public class DatabaseUserDao implements UserDao {
             statementAdd.setString(2, user.getPassword());
             statementAdd.setString(3, user.getEmail());
             statementAdd.setString(4, user.getCountry());
+            statementAdd.setInt(5, user.getRole().getId());
 
             log.debug("Get users sql: " + sqlQueryGet);
-            log.debug("Update user sql: " + sqlQueryAdd);
+            log.debug("Add user sql: " + sqlQueryAdd);
             if (!statementGet.executeQuery().next()) {
                 if (statementAdd.execute()) {
                     log.debug("Added user with login: " + user.getLogin());
@@ -62,7 +64,9 @@ public class DatabaseUserDao implements UserDao {
             while (resultSet.next()) {
                 users.add(new User(resultSet.getInt("id"), resultSet.getString("login"),
                         resultSet.getString("pass"), resultSet.getString("email"),
-                        resultSet.getString("country")));
+                        resultSet.getString("country"),
+                        resultSet.getString("name") == null ? Role.NOTAUTORIZE :
+                                Role.valueOf(resultSet.getString("name"))));
             }
         } catch (SQLException e) {
             log.error("Can't get users from DB", e);
@@ -72,16 +76,18 @@ public class DatabaseUserDao implements UserDao {
 
     @Override
     public Optional<User> getUser(String login) {
-        String sqlGetOne = "SELECT * FROM users WHERE login = '" + login + "';";
+        String sqlGetOne = "SELECT * FROM users LEFT JOIN roles ON users.role = roles.id WHERE login = '" + login + "';";
         log.debug("Get user sql: " + sqlGetOne);
         try (Connection connection = DbConnector.getConnection();
         Statement statement = connection.createStatement()) {
             ResultSet rs = statement.executeQuery(sqlGetOne);
             if (rs.next()) {
                 log.debug("Get user from DB with login: " + login);
-                return Optional.of(new User(rs.getInt("id"),
-                        rs.getString("login"), rs.getString("pass"),
-                        rs.getString("email"), rs.getString("country")));
+                return Optional.of(new User(rs.getInt("id"), rs.getString("login"),
+                        rs.getString("pass"), rs.getString("email"),
+                        rs.getString("country"),
+                        rs.getString("name") == null ? Role.NOTAUTORIZE :
+                                Role.valueOf(rs.getString("name"))));
             }
         } catch (SQLException e) {
             log.error("Can't get user from DB", e);
@@ -92,7 +98,7 @@ public class DatabaseUserDao implements UserDao {
 
     @Override
     public boolean updateUser(User user) {
-        String sqlUpdateUser = "UPDATE users SET login = ?, pass = ?, email = ?, country = ? WHERE id = ?;";
+        String sqlUpdateUser = "UPDATE users SET login = ?, pass = ?, email = ?, country = ?, role = ? WHERE id = ?;";
         try (Connection connection = DbConnector.getConnection();
              PreparedStatement statement = connection.prepareStatement(sqlUpdateUser)) {
 
@@ -100,7 +106,15 @@ public class DatabaseUserDao implements UserDao {
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getEmail());
             statement.setString(4, user.getCountry());
-            statement.setInt(5, user.getId());
+            statement.setInt(6, user.getId());
+
+            if (user.getRole().equals(Role.ADMIN)) {
+                statement.setInt(5, 3);
+            } else if (user.getRole().equals(Role.USER)) {
+                statement.setInt(5, 2);
+            } else  {
+                statement.setInt(5, 1);
+            }
 
             log.debug("Update user sql:" + sqlUpdateUser);
 
