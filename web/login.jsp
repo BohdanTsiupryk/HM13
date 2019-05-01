@@ -7,9 +7,10 @@
 </head>
 <body>
     <div align="center">
-        <c:if test="${badPass == true}">
+        <c:if test="${badPass}">
             <b style="color:red">Bad login/password try again or <a href="/registration.jsp">SignUp</a></b> <br><br>
         </c:if>
+        ${successReg}<br>
         Please enter your: <br>
         <form action="/login" method="post" accept-charset="UTF-8">
             Login <br> <input type="text" placeholder="Login" required size="20" name="login"/> <br><br>

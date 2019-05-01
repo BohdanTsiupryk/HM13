@@ -1,7 +1,9 @@
 package mate.dao;
 
+import mate.enums.Role;
 import mate.exception.ThisLoginIsExistException;
 import mate.model.User;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,11 +15,12 @@ import java.util.List;
 import java.util.Optional;
 
 public class DatabaseUserDao implements UserDao {
-    private String sqlGetAll = "SELECT * FROM users;";
+    private static final Logger log = Logger.getLogger(DatabaseUserDao.class);
+    private String sqlGetAll = "SELECT users.id,login,pass, email, country, name FROM users LEFT JOIN roles ON users.role = roles.id;";
 
     @Override
-    public void addUser(User user) throws ThisLoginIsExistException {
-        String sqlQueryAdd = "INSERT INTO users(login,pass,email,country) VALUES (?,?,?,?)";
+    public boolean addUser(User user) throws ThisLoginIsExistException {
+        String sqlQueryAdd = "INSERT INTO users(login,pass,email,country,role) VALUES (?,?,?,?,?)";
         String sqlQueryGet = "SELECT * FROM users WHERE login = ?";
 
         try (Connection connection = DbConnector.getConnection();
@@ -29,16 +32,24 @@ public class DatabaseUserDao implements UserDao {
             statementAdd.setString(2, user.getPassword());
             statementAdd.setString(3, user.getEmail());
             statementAdd.setString(4, user.getCountry());
+            statementAdd.setInt(5, user.getRole().getId());
 
+            log.debug("Get users sql: " + sqlQueryGet);
+            log.debug("Add user sql: " + sqlQueryAdd);
             if (!statementGet.executeQuery().next()) {
-                statementAdd.execute();
+                if (statementAdd.execute()) {
+                    log.debug("Added user with login: " + user.getLogin());
+                }
+                return true;
             } else {
+                log.debug("Trying to add user with nounic login: " + user.getLogin());
                 throw new ThisLoginIsExistException();
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Can't add user to DB", e);
         }
+        return false;
     }
 
     @Override
@@ -53,35 +64,41 @@ public class DatabaseUserDao implements UserDao {
             while (resultSet.next()) {
                 users.add(new User(resultSet.getInt("id"), resultSet.getString("login"),
                         resultSet.getString("pass"), resultSet.getString("email"),
-                        resultSet.getString("country")));
+                        resultSet.getString("country"),
+                        resultSet.getString("name") == null ? Role.NOTAUTORIZE :
+                                Role.valueOf(resultSet.getString("name"))));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Can't get users from DB", e);
         }
         return users;
     }
 
     @Override
     public Optional<User> getUser(String login) {
-        String sqlGetOne = "SELECT * FROM users WHERE login = '" + login + "';";
-
+        String sqlGetOne = "SELECT * FROM users LEFT JOIN roles ON users.role = roles.id WHERE login = '" + login + "';";
+        log.debug("Get user sql: " + sqlGetOne);
         try (Connection connection = DbConnector.getConnection();
         Statement statement = connection.createStatement()) {
             ResultSet rs = statement.executeQuery(sqlGetOne);
             if (rs.next()) {
-                return Optional.of(new User(rs.getInt("id"),
-                        rs.getString("login"), rs.getString("pass"),
-                        rs.getString("email"), rs.getString("country")));
+                log.debug("Get user from DB with login: " + login);
+                return Optional.of(new User(rs.getInt("id"), rs.getString("login"),
+                        rs.getString("pass"), rs.getString("email"),
+                        rs.getString("country"),
+                        rs.getString("name") == null ? Role.NOTAUTORIZE :
+                                Role.valueOf(rs.getString("name"))));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Can't get user from DB", e);
         }
+        log.debug("User with login: " + login + "isn't exist");
         return Optional.empty();
     }
 
     @Override
-    public void updateUser(User user) {
-        String sqlUpdateUser = "UPDATE users SET login = ?, pass = ?, email = ?, country = ? WHERE id = ?;";
+    public boolean updateUser(User user) {
+        String sqlUpdateUser = "UPDATE users SET login = ?, pass = ?, email = ?, country = ?, role = ? WHERE id = ?;";
         try (Connection connection = DbConnector.getConnection();
              PreparedStatement statement = connection.prepareStatement(sqlUpdateUser)) {
 
@@ -89,25 +106,49 @@ public class DatabaseUserDao implements UserDao {
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getEmail());
             statement.setString(4, user.getCountry());
-            statement.setInt(5, user.getId());
+            statement.setInt(6, user.getId());
 
-            statement.executeUpdate();
+            if (user.getRole().equals(Role.ADMIN)) {
+                statement.setInt(5, 3);
+            } else if (user.getRole().equals(Role.USER)) {
+                statement.setInt(5, 2);
+            } else  {
+                statement.setInt(5, 1);
+            }
+
+            log.debug("Update user sql:" + sqlUpdateUser);
+
+            int update = statement.executeUpdate();
+
+            if (update == 1) {
+                log.debug("Successful update user with id:" + user.getId());
+                return true;
+            } else if (update > 1){
+                log.error("Update more than one row");
+                return false;
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Can't update user in DB", e);
         }
+
+        log.debug("User whit login: " + user.getLogin() + ", id: " + user.getId() + " - isn't exist");
+        return false;
     }
 
     @Override
-    public void deleteUser(int id) {
+    public boolean deleteUser(int id) {
         String sqlDeleteUser = "DELETE FROM users WHERE id=" + id + ";";
+        log.debug("Delete SQL: " + sqlDeleteUser);
 
         try (Connection connection = DbConnector.getConnection();
              Statement statement = connection.createStatement()) {
 
-           statement.execute(sqlDeleteUser);
+            log.debug("Delete user with id: " + id);
+            return statement.execute(sqlDeleteUser);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Can't delete user in DB", e);
         }
+        return false;
     }
 
     @Override
@@ -118,11 +159,12 @@ public class DatabaseUserDao implements UserDao {
 
             while (resultSet.next()) {
                 if (resultSet.getString("login").equals(login)) {
+                    log.debug("User whit login: " + login + " is exist");
                     return true;
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Login DB contains error", e);
         }
         return false;
     }
@@ -136,12 +178,13 @@ public class DatabaseUserDao implements UserDao {
             while (resultSet.next()) {
                 if (resultSet.getString("login").equals(login)) {
                     if (resultSet.getString("pass").equals(pass)) {
+                        log.debug("User whit login: " + login + " and pass is exist");
                         return true;
                     }
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Login, password DB contains error", e);
         }
         return false;
     }

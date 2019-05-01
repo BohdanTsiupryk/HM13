@@ -2,7 +2,9 @@ package mate.servlets;
 
 import mate.dao.DatabaseUserDao;
 import mate.dao.UserDao;
+import mate.enums.Role;
 import mate.model.User;
+import org.apache.log4j.Logger;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -15,13 +17,19 @@ import java.util.List;
 
 @WebServlet(value = "/edit")
 public class EditServlet extends HttpServlet {
+    private static final Logger log = Logger.getLogger(EditServlet.class);
     private static final UserDao userService = new DatabaseUserDao();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String edit = request.getParameter("edit");
-        User user = userService.getUser(edit).get();
+        String login = request.getParameter("edit");
+        User user = userService.getUser(login).get();
+        User userSesion = (User) request.getSession().getAttribute("user");
+        log.debug("Get user with login: " + user.getLogin());
 
         request.setAttribute("user", user);
+        request.setAttribute("editorRole", userSesion.getRole().getName());
+        log.debug("Send user:" + user.getLogin() +" to view");
+
         RequestDispatcher dispatcher = request.getRequestDispatcher("edit.jsp");
         dispatcher.forward(request, response);
     }
@@ -33,12 +41,18 @@ public class EditServlet extends HttpServlet {
         String email = req.getParameter("email");
         String country = req.getParameter("country");
         String id = req.getParameter("id");
+        String role = req.getParameter("role") == null ? Role.USER.getName() : req.getParameter("role");
 
-        userService.updateUser(new User(Integer.valueOf(id), login, password, email, country));
+        if (userService.updateUser(new User(Integer.valueOf(id), login, password,
+                email, country, Role.valueOf(role)))) {
+            log.debug("User with id: " + id + ", change information");
+        }
+
         List<User> users = userService.getUsers();
+        log.debug("Get users, count: " + users.size());
         req.setAttribute("users", users);
 
-        RequestDispatcher rd = req.getRequestDispatcher("hello.jsp");
+        RequestDispatcher rd = req.getRequestDispatcher("adminPage.jsp");
         rd.forward(req, resp);
     }
 }
